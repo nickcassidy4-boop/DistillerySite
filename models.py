@@ -1,0 +1,120 @@
+from sqlalchemy import Column, Integer, String, Float, DateTime, Text, ForeignKey, Enum
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+import enum
+
+from database import Base
+
+
+class SessionStatus(str, enum.Enum):
+    planning = "planning"
+    fermenting = "fermenting"
+    conditioning = "conditioning"
+    complete = "complete"
+
+
+class Recipe(Base):
+    __tablename__ = "recipes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    style = Column(String)                  # e.g. "IPA", "Stout", "Lager"
+    target_og = Column(Float)               # Original gravity
+    target_fg = Column(Float)               # Final gravity
+    target_abv = Column(Float)              # Alcohol by volume %
+    batch_size_litres = Column(Float)
+    notes = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    grain_bill = relationship("GrainBill", back_populates="recipe", cascade="all, delete-orphan")
+    hops = relationship("HopAddition", back_populates="recipe", cascade="all, delete-orphan")
+    yeast = relationship("Yeast", back_populates="recipe", cascade="all, delete-orphan")
+    brew_sessions = relationship("BrewSession", back_populates="recipe")
+
+
+class GrainBill(Base):
+    __tablename__ = "grain_bill"
+
+    id = Column(Integer, primary_key=True, index=True)
+    recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=False)
+    grain_name = Column(String, nullable=False)
+    amount_kg = Column(Float, nullable=False)
+
+    recipe = relationship("Recipe", back_populates="grain_bill")
+
+
+class HopAddition(Base):
+    __tablename__ = "hop_additions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=False)
+    hop_name = Column(String, nullable=False)
+    amount_grams = Column(Float, nullable=False)
+    alpha_acid = Column(Float)              # AA%
+    addition_time_mins = Column(Integer)    # Minutes from end of boil
+    purpose = Column(String)               # "bittering", "flavour", "aroma", "dry hop"
+
+    recipe = relationship("Recipe", back_populates="hops")
+
+
+class Yeast(Base):
+    __tablename__ = "yeast"
+
+    id = Column(Integer, primary_key=True, index=True)
+    recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=False)
+    yeast_name = Column(String, nullable=False)
+    amount_grams = Column(Float)
+    notes = Column(Text)
+
+    recipe = relationship("Recipe", back_populates="yeast")
+
+
+class BrewSession(Base):
+    __tablename__ = "brew_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=False)
+    batch_number = Column(String)           # e.g. "2024-001"
+    brew_date = Column(DateTime(timezone=True))
+    status = Column(Enum(SessionStatus), default=SessionStatus.planning)
+
+    # Mash
+    mash_temp_c = Column(Float)
+    mash_time_mins = Column(Integer)
+
+    # Boil
+    boil_time_mins = Column(Integer)
+    pre_boil_volume_litres = Column(Float)
+    post_boil_volume_litres = Column(Float)
+
+    # Actuals
+    actual_og = Column(Float)
+    actual_fg = Column(Float)
+    actual_abv = Column(Float)
+    actual_yield_litres = Column(Float)
+    brewhouse_efficiency = Column(Float)    # %
+
+    notes = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    recipe = relationship("Recipe", back_populates="brew_sessions")
+    fermentation_readings = relationship("FermentationReading", back_populates="session", cascade="all, delete-orphan")
+
+
+class FermentationReading(Base):
+    """Stores data from the RAPT Pill hydrometer (and manual entries)."""
+    __tablename__ = "fermentation_readings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(Integer, ForeignKey("brew_sessions.id"), nullable=False)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    gravity = Column(Float)
+    temperature_c = Column(Float)
+    battery = Column(Float)                 # RAPT Pill battery %
+    rssi = Column(Integer)                  # Signal strength
+    source = Column(String, default="manual")  # "rapt_webhook" or "manual"
+
+    session = relationship("BrewSession", back_populates="fermentation_readings")

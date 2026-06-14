@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — Homebrew Tracker{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div class="card" style="text-align: center;">
+        <div style="font-size: 2.5rem; font-weight: 700; color: #f5a623;">{{ recipe_count }}</div>
+        <div style="color: #aaa; margin-top: 0.3rem;">Recipes</div>
+    </div>
+    <div class="card" style="text-align: center;">
+        <div style="font-size: 2.5rem; font-weight: 700; color: #f5a623;">{{ session_count }}</div>
+        <div style="color: #aaa; margin-top: 0.3rem;">Brew Sessions</div>
+    </div>
+    <div class="card" style="text-align: center;">
+        <div style="font-size: 2.5rem; font-weight: 700; color: #f5a623;">{{ active_count }}</div>
+        <div style="color: #aaa; margin-top: 0.3rem;">Active Ferments</div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Recent Brew Sessions</h2>
+    {% if sessions %}
+        <table style="width: 100%; border-collapse: collapse; margin-top: 0.5rem;">
+            <thead>
+                <tr style="border-bottom: 1px solid #0f3460; color: #aaa; font-size: 0.85rem;">
+                    <th style="text-align:left; padding: 0.5rem;">Batch</th>
+                    <th style="text-align:left; padding: 0.5rem;">Recipe</th>
+                    <th style="text-align:left; padding: 0.5rem;">Date</th>
+                    <th style="text-align:left; padding: 0.5rem;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for s in sessions %}
+                <tr style="border-bottom: 1px solid #0f3460;">
+                    <td style="padding: 0.6rem 0.5rem;">{{ s.batch_number or "—" }}</td>
+                    <td style="padding: 0.6rem 0.5rem;">{{ s.recipe.name if s.recipe else "—" }}</td>
+                    <td style="padding: 0.6rem 0.5rem;">{{ s.brew_date.strftime("%d %b %Y") if s.brew_date else "—" }}</td>
+                    <td style="padding: 0.6rem 0.5rem;">
+                        <span class="badge badge-{{ s.status }}">{{ s.status }}</span>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="color: #aaa; margin-top: 0.5rem;">No brew sessions yet. <a href="/sessions" style="color: #f5a623;">Start one →</a></p>
+    {% endif %}
+</div>
+{% endblock %}
