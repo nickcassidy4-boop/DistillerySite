@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, Depends
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from jinja2 import Environment, FileSystemLoader
+from starlette.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from database import engine, get_db
@@ -12,7 +13,8 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Homebrew Tracker", version="0.1.0")
 
-templates = Jinja2Templates(directory="templates")
+jinja_env = Environment(loader=FileSystemLoader("templates"))
+templates = Jinja2Templates(env=jinja_env)
 
 # Register routers
 app.include_router(recipes.router)

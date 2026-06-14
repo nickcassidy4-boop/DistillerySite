@@ -1,12 +1,12 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, Float, DateTime, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-import enum
+
 
 from database import Base
 
 
-class SessionStatus(str, enum.Enum):
+class SessionStatus:
     planning = "planning"
     fermenting = "fermenting"
     conditioning = "conditioning"
@@ -78,7 +78,7 @@ class BrewSession(Base):
     recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=False)
     batch_number = Column(String)           # e.g. "2024-001"
     brew_date = Column(DateTime(timezone=True))
-    status = Column(Enum(SessionStatus), default=SessionStatus.planning)
+    status = Column(String, default=SessionStatus.planning)
 
     # Mash
     mash_temp_c = Column(Float)
