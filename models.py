@@ -9,8 +9,8 @@ from database import Base
 class SessionStatus:
     planning = "planning"
     fermenting = "fermenting"
-    conditioning = "conditioning"
-    complete = "complete"
+    stripping_run = "Stripping Run"
+    spirit_run = "Spirit Run"
 
 
 class Recipe(Base):
@@ -32,6 +32,7 @@ class Recipe(Base):
     hops = relationship("HopAddition", back_populates="recipe", cascade="all, delete-orphan")
     yeast = relationship("Yeast", back_populates="recipe", cascade="all, delete-orphan")
     brew_sessions = relationship("BrewSession", back_populates="recipe")
+    spirit_runs = relationship("SpiritRun", back_populates="recipe")
 
 
 class GrainBill(Base):
@@ -70,6 +71,27 @@ class Yeast(Base):
 
     recipe = relationship("Recipe", back_populates="yeast")
 
+class SpiritRun(Base):
+    __tablename__ = "spirit_runs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=False)
+    batch_number = Column(Integer, nullable=False)
+    fermentation_start_date = Column(DateTime(timezone=True))
+    status = Column(String, default=SessionStatus.planning)
+
+
+    # Wash
+    actual_og = Column(Float)
+    actual_fg = Column(Float)
+    actual_abv = Column(Float)
+
+
+    notes = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    recipe = relationship("Recipe", back_populates="spirit_runs")
+    fermentation_readings = relationship("FermentationReading", back_populates="spirit_session", cascade="all, delete-orphan")
 
 class BrewSession(Base):
     __tablename__ = "brew_sessions"
@@ -83,6 +105,8 @@ class BrewSession(Base):
     # Mash
     mash_temp_c = Column(Float)
     mash_time_mins = Column(Integer)
+
+
 
     # Boil
     boil_time_mins = Column(Integer)
@@ -109,7 +133,8 @@ class FermentationReading(Base):
     __tablename__ = "fermentation_readings"
 
     id = Column(Integer, primary_key=True, index=True)
-    session_id = Column(Integer, ForeignKey("brew_sessions.id"), nullable=False)
+    session_id = Column(Integer, ForeignKey("brew_sessions.id"), nullable=True)
+    spirit_run_id = Column(Integer, ForeignKey("spirit_runs.id"), nullable=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
     gravity = Column(Float)
     temperature_c = Column(Float)
@@ -118,3 +143,4 @@ class FermentationReading(Base):
     source = Column(String, default="manual")  # "rapt_webhook" or "manual"
 
     session = relationship("BrewSession", back_populates="fermentation_readings")
+    spirit_session = relationship("SpiritRun", back_populates="fermentation_readings")
