@@ -46,7 +46,7 @@ def create_run(
     recipe_id: int = Form(...),
     batch_number: int = Form(...),
     status: str = Form(models.SessionStatus.planning),
-    fermentation_start_date=datetime.strptime(fermentation_start_date, "%Y-%m-%d") if fermentation_start_date else None,
+    fermentation_start_date: Optional[str] = Form(None),
     actual_og: Optional[float] = Form(None),
     actual_fg: Optional[float] = Form(None),
     actual_abv: Optional[float] = Form(None),
@@ -57,7 +57,7 @@ def create_run(
         recipe_id=recipe_id,
         batch_number=batch_number,
         status=status,
-        fermentation_start_date=fermentation_start_date or None,
+        fermentation_start_date=datetime.strptime(fermentation_start_date, "%Y-%m-%d") if fermentation_start_date else None,
         actual_og=actual_og,
         actual_fg=actual_fg,
         actual_abv=actual_abv,
@@ -82,7 +82,6 @@ def edit_run_form(run_id: int, request: Request, db: Session = Depends(get_db)):
         "title": "Edit Spirit Run",
     })
 
-
 @router.post("/{run_id}/edit")
 def update_run(
     run_id: int,
@@ -90,7 +89,7 @@ def update_run(
     recipe_id: int = Form(...),
     batch_number: int = Form(...),
     status: str = Form(models.SessionStatus.planning),
-    fermentation_start_date=datetime.strptime(fermentation_start_date, "%Y-%m-%d") if fermentation_start_date else None,
+    fermentation_start_date: Optional[str] = Form(None),
     actual_og: Optional[float] = Form(None),
     actual_fg: Optional[float] = Form(None),
     actual_abv: Optional[float] = Form(None),
@@ -104,7 +103,7 @@ def update_run(
     run.recipe_id = recipe_id
     run.batch_number = batch_number
     run.status = status
-    run.fermentation_start_date = fermentation_start_date or None
+    run.fermentation_start_date = datetime.strptime(fermentation_start_date, "%Y-%m-%d") if fermentation_start_date else None
     run.actual_og = actual_og
     run.actual_fg = actual_fg
     run.actual_abv = actual_abv
