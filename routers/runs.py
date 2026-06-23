@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from starlette.templating import Jinja2Templates
 from jinja2 import Environment, FileSystemLoader
 from typing import Optional
+from datetime import datetime
 
 from database import get_db
 import models
@@ -45,7 +46,7 @@ def create_run(
     recipe_id: int = Form(...),
     batch_number: int = Form(...),
     status: str = Form(models.SessionStatus.planning),
-    fermentation_start_date: Optional[str] = Form(None),
+    fermentation_start_date=datetime.strptime(fermentation_start_date, "%Y-%m-%d") if fermentation_start_date else None,
     actual_og: Optional[float] = Form(None),
     actual_fg: Optional[float] = Form(None),
     actual_abv: Optional[float] = Form(None),
@@ -89,7 +90,7 @@ def update_run(
     recipe_id: int = Form(...),
     batch_number: int = Form(...),
     status: str = Form(models.SessionStatus.planning),
-    fermentation_start_date: Optional[str] = Form(None),
+    fermentation_start_date=datetime.strptime(fermentation_start_date, "%Y-%m-%d") if fermentation_start_date else None,
     actual_og: Optional[float] = Form(None),
     actual_fg: Optional[float] = Form(None),
     actual_abv: Optional[float] = Form(None),
