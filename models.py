@@ -18,11 +18,12 @@ class Recipe(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    style = Column(String)                  # e.g. "IPA", "Stout", "Lager"
-    target_og = Column(Float)               # Original gravity
-    target_fg = Column(Float)               # Final gravity
-    target_abv = Column(Float)              # Alcohol by volume %
-    batch_size_litres = Column(Float)
+    spirit_type = Column(String)            # e.g. "Whisky", "Rum", "Vodka", "Gin"
+    mash_bill = Column(Text)               # Free text description of grain bill
+    target_wash_og = Column(Float)         # Target original gravity of the wash
+    target_wash_abv = Column(Float)        # Target ABV % of the wash
+    water_volume_litres = Column(Float)    # Total water volume
+    yeast_strain = Column(String)          # e.g. "EC-1118", "US-05"
     notes = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

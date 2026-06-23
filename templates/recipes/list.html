@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recipes – Homebrew Tracker</title>
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid #ddd; }
+        th { background: #f4f4f4; }
+        a { color: #2563eb; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .btn { display: inline-block; padding: 0.4rem 0.9rem; border-radius: 4px; font-size: 0.9rem; cursor: pointer; }
+        .btn-primary { background: #2563eb; color: white; border: none; }
+        .btn-danger { background: #dc2626; color: white; border: none; }
+        .actions { display: flex; gap: 0.5rem; }
+        nav { margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+    <nav><a href="/">← Dashboard</a></nav>
+    <h1>Recipes</h1>
+    <a href="/recipes/new" class="btn btn-primary">+ New Recipe</a>
+
+    {% if recipes %}
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Spirit Type</th>
+                <th>Target OG</th>
+                <th>Target ABV</th>
+                <th>Water (L)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recipe in recipes %}
+            <tr>
+                <td>{{ recipe.name }}</td>
+                <td>{{ recipe.spirit_type or "—" }}</td>
+                <td>{{ recipe.target_wash_og or "—" }}</td>
+                <td>{{ recipe.target_wash_abv or "—" }}</td>
+                <td>{{ recipe.water_volume_litres or "—" }}</td>
+                <td class="actions">
+                    <a href="/recipes/{{ recipe.id }}/edit" class="btn btn-primary">Edit</a>
+                    <form method="post" action="/recipes/{{ recipe.id }}/delete"
+                          onsubmit="return confirm('Delete {{ recipe.name }}?')">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No recipes yet. <a href="/recipes/new">Add your first one.</a></p>
+    {% endif %}
+</body>
+</html>

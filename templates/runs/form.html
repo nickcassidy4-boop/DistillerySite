@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }} – Homebrew Tracker</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+        label { display: block; margin-top: 1rem; font-weight: bold; font-size: 0.9rem; }
+        input, textarea, select { width: 100%; padding: 0.4rem 0.6rem; margin-top: 0.25rem;
+            border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; box-sizing: border-box; }
+        textarea { height: 100px; resize: vertical; }
+        .btn { display: inline-block; padding: 0.5rem 1.2rem; border-radius: 4px;
+            font-size: 1rem; cursor: pointer; margin-top: 1.5rem; border: none; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-secondary { background: #6b7280; color: white; margin-left: 0.5rem; }
+        nav { margin-bottom: 1.5rem; }
+        a { color: #2563eb; text-decoration: none; }
+        .hint { font-size: 0.8rem; color: #6b7280; font-weight: normal; }
+    </style>
+</head>
+<body>
+    <nav><a href="/runs">← Spirit Runs</a></nav>
+    <h1>{{ title }}</h1>
+
+    <form method="post" action="{{ action }}">
+
+        <label>Recipe *
+            <select name="recipe_id" required>
+                <option value="">— Select a recipe —</option>
+                {% for recipe in recipes %}
+                <option value="{{ recipe.id }}"
+                    {% if run and run.recipe_id == recipe.id %}selected{% endif %}>
+                    {{ recipe.name }}{% if recipe.spirit_type %} ({{ recipe.spirit_type }}){% endif %}
+                </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>Batch Number *
+            <input type="number" name="batch_number" required min="1"
+                   value="{{ run.batch_number if run else '' }}">
+        </label>
+
+        <label>Status
+            <select name="status">
+                {% for label, value in [
+                    ("Planning", "planning"),
+                    ("Fermenting", "fermenting"),
+                    ("Stripping Run", "Stripping Run"),
+                    ("Spirit Run", "Spirit Run"),
+                ] %}
+                <option value="{{ value }}"
+                    {% if run and run.status == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>Fermentation Start Date
+            <input type="date" name="fermentation_start_date"
+                   value="{{ run.fermentation_start_date.strftime('%Y-%m-%d') if run and run.fermentation_start_date else '' }}">
+        </label>
+
+        <label>Actual OG <span class="hint">(e.g. 1.060)</span>
+            <input type="number" name="actual_og" step="0.001" min="1.000" max="1.200"
+                   value="{{ run.actual_og if run else '' }}">
+        </label>
+
+        <label>Actual FG <span class="hint">(e.g. 1.010)</span>
+            <input type="number" name="actual_fg" step="0.001" min="0.990" max="1.200"
+                   value="{{ run.actual_fg if run else '' }}">
+        </label>
+
+        <label>Actual ABV %
+            <input type="number" name="actual_abv" step="0.1" min="0" max="20"
+                   value="{{ run.actual_abv if run else '' }}">
+        </label>
+
+        <label>Notes
+            <textarea name="notes">{{ run.notes if run else '' }}</textarea>
+        </label>
+
+        <button type="submit" class="btn btn-primary">Save Run</button>
+        <a href="/runs" class="btn btn-secondary">Cancel</a>
+    </form>
+</body>
+</html>
