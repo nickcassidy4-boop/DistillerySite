@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from database import engine, get_db
 import models
-from routers import recipes, runs
+from routers import recipes, runs, readings
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -17,6 +17,7 @@ templates = Jinja2Templates(env=jinja_env)
 
 app.include_router(recipes.router)
 app.include_router(runs.router)
+app.include_router(readings.router)
 
 
 @app.get("/", response_class=HTMLResponse)

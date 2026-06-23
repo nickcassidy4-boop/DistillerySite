@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Readings — Batch #{{ run.batch_number }} — Homebrew Tracker{% endblock %}
+
+{% block content %}
+<h1>Batch #{{ run.batch_number }} — Fermentation Readings</h1>
+
+<div style="margin-bottom: 1.5rem;">
+    <a href="/runs/{{ run.id }}/edit" class="btn btn-secondary">← Edit Run</a>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h2>Run Summary</h2>
+    <table style="margin-top: 0.5rem;">
+        <tr>
+            <td style="padding: 0.3rem 1rem 0.3rem 0; color: #aaa;">Recipe</td>
+            <td>{{ run.recipe.name if run.recipe else "—" }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 0.3rem 1rem 0.3rem 0; color: #aaa;">Status</td>
+            <td><span class="badge badge-{{ run.status | replace(' ', '-') }}">{{ run.status }}</span></td>
+        </tr>
+        <tr>
+            <td style="padding: 0.3rem 1rem 0.3rem 0; color: #aaa;">OG / FG</td>
+            <td>{{ run.actual_og or "—" }} / {{ run.actual_fg or "—" }}</td>
+        </tr>
+        <tr>
+            <td style="padding: 0.3rem 1rem 0.3rem 0; color: #aaa;">ABV</td>
+            <td>{{ run.actual_abv or "—" }}%</td>
+        </tr>
+    </table>
+</div>
+
+{% if readings %}
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h2>Gravity & Temperature Over Time</h2>
+    <canvas id="fermentChart" style="margin-top: 1rem; max-height: 300px;"></canvas>
+</div>
+{% endif %}
+
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h2>Add Reading</h2>
+    <form method="post" action="/runs/{{ run.id }}/readings/add"
+          style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; margin-top: 1rem;">
+
+        <label style="display:block; font-weight: bold; font-size: 0.9rem;">Gravity
+            <input type="number" name="gravity" step="0.001" min="0.990" max="1.200"
+                   placeholder="1.060"
+                   style="display:block; width: 120px; padding: 0.4rem 0.6rem; margin-top: 0.25rem;
+                          border: 1px solid #0f3460; border-radius: 4px; font-size: 1rem;
+                          background: #1a1a2e; color: #e0e0e0;">
+        </label>
+
+        <label style="display:block; font-weight: bold; font-size: 0.9rem;">Temp (°C)
+            <input type="number" name="temperature_c" step="0.1"
+                   placeholder="20.0"
+                   style="display:block; width: 120px; padding: 0.4rem 0.6rem; margin-top: 0.25rem;
+                          border: 1px solid #0f3460; border-radius: 4px; font-size: 1rem;
+                          background: #1a1a2e; color: #e0e0e0;">
+        </label>
+
+        <button type="submit" class="btn btn-primary" style="margin-bottom: 0.1rem;">Add</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>All Readings</h2>
+    {% if readings %}
+    <table style="width: 100%; border-collapse: collapse; margin-top: 0.5rem;">
+        <thead>
+            <tr style="border-bottom: 1px solid #0f3460; color: #aaa; font-size: 0.85rem;">
+                <th style="text-align:left; padding: 0.5rem;">Timestamp</th>
+                <th style="text-align:left; padding: 0.5rem;">Gravity</th>
+                <th style="text-align:left; padding: 0.5rem;">Temp (°C)</th>
+                <th style="text-align:left; padding: 0.5rem;">Source</th>
+                <th style="text-align:left; padding: 0.5rem;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in readings %}
+            <tr style="border-bottom: 1px solid #0f3460;">
+                <td style="padding: 0.6rem 0.5rem;">{{ r.timestamp.strftime("%d %b %Y %H:%M") }}</td>
+                <td style="padding: 0.6rem 0.5rem;">{{ r.gravity or "—" }}</td>
+                <td style="padding: 0.6rem 0.5rem;">{{ r.temperature_c or "—" }}</td>
+                <td style="padding: 0.6rem 0.5rem;">{{ r.source }}</td>
+                <td style="padding: 0.6rem 0.5rem;">
+                    <form method="post"
+                          action="/runs/{{ run.id }}/readings/{{ r.id }}/delete"
+                          onsubmit="return confirm('Delete this reading?')">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #aaa; margin-top: 0.5rem;">No readings yet. Add one above.</p>
+    {% endif %}
+</div>
+
+{% if readings %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+    const labels = [
+        {% for r in readings %}"{{ r.timestamp.strftime('%d %b %H:%M') }}"{% if not loop.last %},{% endif %}{% endfor %}
+    ];
+    const gravityData = [
+        {% for r in readings %}{{ r.gravity or 'null' }}{% if not loop.last %},{% endif %}{% endfor %}
+    ];
+    const tempData = [
+        {% for r in readings %}{{ r.temperature_c or 'null' }}{% if not loop.last %},{% endif %}{% endfor %}
+    ];
+
+    new Chart(document.getElementById('fermentChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Gravity',
+                    data: gravityData,
+                    borderColor: '#f5a623',
+                    backgroundColor: 'rgba(245,166,35,0.1)',
+                    yAxisID: 'yGravity',
+                    tension: 0.3,
+                    spanGaps: true,
+                },
+                {
+                    label: 'Temp (°C)',
+                    data: tempData,
+                    borderColor: '#60a5fa',
+                    backgroundColor: 'rgba(96,165,250,0.1)',
+                    yAxisID: 'yTemp',
+                    tension: 0.3,
+                    spanGaps: true,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { labels: { color: '#e0e0e0' } } },
+            scales: {
+                x: { ticks: { color: '#aaa' }, grid: { color: '#0f3460' } },
+                yGravity: {
+                    type: 'linear',
+                    position: 'left',
+                    ticks: { color: '#f5a623' },
+                    grid: { color: '#0f3460' },
+                    title: { display: true, text: 'Gravity', color: '#f5a623' }
+                },
+                yTemp: {
+                    type: 'linear',
+                    position: 'right',
+                    ticks: { color: '#60a5fa' },
+                    grid: { drawOnChartArea: false },
+                    title: { display: true, text: 'Temp °C', color: '#60a5fa' }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

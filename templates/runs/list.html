@@ -6,6 +6,7 @@
 <h1>Spirit Runs</h1>
 <a href="/runs/new" class="btn btn-primary">+ New Run</a>
 
+
 {% if runs %}
 <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
     <thead>
@@ -32,11 +33,12 @@
             <td style="padding: 0.6rem 0.5rem;">{{ run.actual_abv or "—" }}</td>
             <td style="padding: 0.6rem 0.5rem;">
                 <div style="display: flex; gap: 0.5rem;">
+                    <a href="/runs/{{ run.id }}/readings" class="btn btn-secondary">Readings</a>
                     <a href="/runs/{{ run.id }}/edit" class="btn btn-secondary">Edit</a>
                     <form method="post" action="/runs/{{ run.id }}/delete"
                           onsubmit="return confirm('Delete batch #{{ run.batch_number }}?')">
                         <button type="submit" class="btn btn-danger">Delete</button>
-                    </form>
+                     </form>
                 </div>
             </td>
         </tr>

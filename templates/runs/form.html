@@ -4,7 +4,11 @@
 
 {% block content %}
 <h1>{{ title }}</h1>
-
+{% if run %}
+<div style="margin-bottom: 1rem;">
+    <a href="/runs/{{ run.id }}/readings" style="color: #f5a623;">View Readings →</a>
+</div>
+{% endif %}
 <div class="card">
     <form method="post" action="{{ action }}">
 
