@@ -1,34 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ title }} – Homebrew Tracker</title>
-    <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
-        label { display: block; margin-top: 1rem; font-weight: bold; font-size: 0.9rem; }
-        input, textarea, select { width: 100%; padding: 0.4rem 0.6rem; margin-top: 0.25rem;
-            border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; box-sizing: border-box; }
-        textarea { height: 100px; resize: vertical; }
-        .btn { display: inline-block; padding: 0.5rem 1.2rem; border-radius: 4px;
-            font-size: 1rem; cursor: pointer; margin-top: 1.5rem; border: none; }
-        .btn-primary { background: #2563eb; color: white; }
-        .btn-secondary { background: #6b7280; color: white; margin-left: 0.5rem; }
-        nav { margin-bottom: 1.5rem; }
-        a { color: #2563eb; text-decoration: none; }
-    </style>
-</head>
-<body>
-    <nav><a href="/recipes">← Recipes</a></nav>
-    <h1>{{ title }}</h1>
+{% extends "base.html" %}
 
+{% block title %}{{ title }} — Homebrew Tracker{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<div class="card">
     <form method="post" action="{{ action }}">
-        <label>Name *
+
+        <label style="display:block; margin-top: 1rem; font-weight: bold; font-size: 0.9rem;">Name *
             <input type="text" name="name" required
-                   value="{{ recipe.name if recipe else '' }}">
+                   value="{{ recipe.name if recipe else '' }}"
+                   style="width:100%; padding: 0.4rem 0.6rem; margin-top: 0.25rem; border: 1px solid #0f3460; border-radius: 4px; font-size: 1rem; box-sizing: border-box; background: #1a1a2e; color: #e0e0e0;">
         </label>
 
-        <label>Spirit Type
-            <select name="spirit_type">
+        <label style="display:block; margin-top: 1rem; font-weight: bold; font-size: 0.9rem;">Spirit Type
+            <select name="spirit_type" style="width:100%; padding: 0.4rem 0.6rem; margin-top: 0.25rem; border: 1px solid #0f3460; border-radius: 4px; font-size: 1rem; box-sizing: border-box; background: #1a1a2e; color: #e0e0e0;">
                 <option value="">— Select —</option>
                 {% for st in ["Whisky", "Rum", "Vodka", "Gin", "Brandy", "Other"] %}
                 <option value="{{ st }}"
@@ -39,36 +26,42 @@
             </select>
         </label>
 
-        <label>Mash Bill
-            <textarea name="mash_bill">{{ recipe.mash_bill if recipe else '' }}</textarea>
+        <label style="display:block; margin-top: 1rem; font-weight: bold; font-size: 0.9rem;">Mash Bill
+            <textarea name="mash_bill" style="width:100%; padding: 0.4rem 0.6rem; margin-top: 0.25rem; border: 1px solid #0f3460; border-radius: 4px; font-size: 1rem; box-sizing: border-box; background: #1a1a2e; color: #e0e0e0; height: 100px; resize: vertical;">{{ recipe.mash_bill if recipe else '' }}</textarea>
         </label>
 
-        <label>Target Wash OG (e.g. 1.060)
+        <label style="display:block; margin-top: 1rem; font-weight: bold; font-size: 0.9rem;">Target Wash OG (e.g. 1.060)
             <input type="number" name="target_wash_og" step="0.001" min="1.000" max="1.200"
-                   value="{{ recipe.target_wash_og if recipe else '' }}">
+                   value="{{ recipe.target_wash_og if recipe else '' }}"
+                   style="width:100%; padding: 0.4rem 0.6rem; margin-top: 0.25rem; border: 1px solid #0f3460; border-radius: 4px; font-size: 1rem; box-sizing: border-box; background: #1a1a2e; color: #e0e0e0;">
         </label>
 
-        <label>Target Wash ABV %
+        <label style="display:block; margin-top: 1rem; font-weight: bold; font-size: 0.9rem;">Target Wash ABV %
             <input type="number" name="target_wash_abv" step="0.1" min="0" max="20"
-                   value="{{ recipe.target_wash_abv if recipe else '' }}">
+                   value="{{ recipe.target_wash_abv if recipe else '' }}"
+                   style="width:100%; padding: 0.4rem 0.6rem; margin-top: 0.25rem; border: 1px solid #0f3460; border-radius: 4px; font-size: 1rem; box-sizing: border-box; background: #1a1a2e; color: #e0e0e0;">
         </label>
 
-        <label>Water Volume (litres)
+        <label style="display:block; margin-top: 1rem; font-weight: bold; font-size: 0.9rem;">Water Volume (litres)
             <input type="number" name="water_volume_litres" step="0.5" min="0"
-                   value="{{ recipe.water_volume_litres if recipe else '' }}">
+                   value="{{ recipe.water_volume_litres if recipe else '' }}"
+                   style="width:100%; padding: 0.4rem 0.6rem; margin-top: 0.25rem; border: 1px solid #0f3460; border-radius: 4px; font-size: 1rem; box-sizing: border-box; background: #1a1a2e; color: #e0e0e0;">
         </label>
 
-        <label>Yeast Strain
+        <label style="display:block; margin-top: 1rem; font-weight: bold; font-size: 0.9rem;">Yeast Strain
             <input type="text" name="yeast_strain"
-                   value="{{ recipe.yeast_strain if recipe else '' }}">
+                   value="{{ recipe.yeast_strain if recipe else '' }}"
+                   style="width:100%; padding: 0.4rem 0.6rem; margin-top: 0.25rem; border: 1px solid #0f3460; border-radius: 4px; font-size: 1rem; box-sizing: border-box; background: #1a1a2e; color: #e0e0e0;">
         </label>
 
-        <label>Notes
-            <textarea name="notes">{{ recipe.notes if recipe else '' }}</textarea>
+        <label style="display:block; margin-top: 1rem; font-weight: bold; font-size: 0.9rem;">Notes
+            <textarea name="notes" style="width:100%; padding: 0.4rem 0.6rem; margin-top: 0.25rem; border: 1px solid #0f3460; border-radius: 4px; font-size: 1rem; box-sizing: border-box; background: #1a1a2e; color: #e0e0e0; height: 100px; resize: vertical;">{{ recipe.notes if recipe else '' }}</textarea>
         </label>
 
-        <button type="submit" class="btn btn-primary">Save Recipe</button>
-        <a href="/recipes" class="btn btn-secondary">Cancel</a>
+        <div style="margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary">Save Recipe</button>
+            <a href="/recipes" class="btn btn-secondary" style="margin-left: 0.5rem;">Cancel</a>
+        </div>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}
